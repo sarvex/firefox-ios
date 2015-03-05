@@ -127,6 +127,21 @@
 		2FA436401ABB8448008031D1 /* HawkHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA4363A1ABB8448008031D1 /* HawkHelperTests.swift */; };
 		2FA436411ABB8448008031D1 /* LiveAccountTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA4363B1ABB8448008031D1 /* LiveAccountTest.swift */; };
 		2FA436421ABB8448008031D1 /* TokenServerClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA4363C1ABB8448008031D1 /* TokenServerClientTests.swift */; };
+		2F834D211A8062D1006A0B7B /* json.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28CE842F1A1E571900576538 /* json.swift */; };
+		2F998FD51AA516380063E75D /* FirefoxAccountConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F998FD41AA516380063E75D /* FirefoxAccountConfiguration.swift */; };
+		2F998FD61AA516380063E75D /* FirefoxAccountConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F998FD41AA516380063E75D /* FirefoxAccountConfiguration.swift */; };
+		2F998FD71AA516380063E75D /* FirefoxAccountConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F998FD41AA516380063E75D /* FirefoxAccountConfiguration.swift */; };
+		2F998FD81AA516380063E75D /* FirefoxAccountConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F998FD41AA516380063E75D /* FirefoxAccountConfiguration.swift */; };
+		2F9990461AA51F5A0063E75D /* HexExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F44FA1C1A9D460500FD20CC /* HexExtensions.swift */; };
+		2FA0AFA31AAFF1E20083E9FA /* HawkHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA0AFA21AAFF1E20083E9FA /* HawkHelperTests.swift */; };
+		2FA0AFA41AAFF2FB0083E9FA /* HawkHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA0AF801AAFB62E0083E9FA /* HawkHelper.swift */; };
+		2FA0AFA51AAFF2FB0083E9FA /* HawkHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA0AF801AAFB62E0083E9FA /* HawkHelper.swift */; };
+		2FA7EAB41AB0BC6F00CE5347 /* FxAClient10.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28CE83B81A1D1D3200576538 /* FxAClient10.swift */; };
+		2FBD37C41AB8F322004833F8 /* HexExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F44FA1C1A9D460500FD20CC /* HexExtensions.swift */; };
+		2FBD37E21AB8F322004833F8 /* HexExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F44FA1C1A9D460500FD20CC /* HexExtensions.swift */; };
+		2FBD37E41AB8F33A004833F8 /* FxALoginStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBD37E31AB8F33A004833F8 /* FxALoginStateMachine.swift */; };
+		2FBD37E51AB8F33A004833F8 /* FxALoginStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBD37E31AB8F33A004833F8 /* FxALoginStateMachine.swift */; };
+		2FBD37E81AB8F353004833F8 /* FxALoginStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FBD37E61AB8F353004833F8 /* FxALoginStateMachineTests.swift */; };
 		2FC244B31A855E05007CE41D /* FxA.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28CE83D01A1D1D5100576538 /* FxA.framework */; };
 		2FC244B81A855E0D007CE41D /* FxA.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28CE83D01A1D1D5100576538 /* FxA.framework */; };
 		2FCAE2251ABB51F800877008 /* Storage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FCAE21A1ABB51F800877008 /* Storage.framework */; };
@@ -901,6 +916,11 @@
 		2FCAE2831ABB533A00877008 /* TestVisitsTable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestVisitsTable.swift; sourceTree = "<group>"; };
 		2FCAE28F1ABB53AA00877008 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		2FCAE33D1ABB5F1800877008 /* Storage-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Storage-Bridging-Header.h"; sourceTree = "<group>"; };
+		2F998FD41AA516380063E75D /* FirefoxAccountConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirefoxAccountConfiguration.swift; sourceTree = "<group>"; };
+		2FA0AF801AAFB62E0083E9FA /* HawkHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HawkHelper.swift; sourceTree = "<group>"; };
+		2FA0AFA21AAFF1E20083E9FA /* HawkHelperTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HawkHelperTests.swift; path = FxATests/HawkHelperTests.swift; sourceTree = "<group>"; };
+		2FBD37E31AB8F33A004833F8 /* FxALoginStateMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FxALoginStateMachine.swift; sourceTree = "<group>"; };
+		2FBD37E61AB8F353004833F8 /* FxALoginStateMachineTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FxALoginStateMachineTests.swift; path = FxATests/FxALoginStateMachineTests.swift; sourceTree = "<group>"; };
 		2FDB10921A9FBEC5006CF312 /* ProfilePrefsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePrefsTests.swift; sourceTree = "<group>"; };
 		2FDE87FD1ABB3817005317B1 /* RemoteTabsPanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteTabsPanel.swift; sourceTree = "<group>"; };
 		2FEBABAE1AB3659000DB5728 /* ResultTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ResultTests.swift; path = SyncTests/ResultTests.swift; sourceTree = "<group>"; };
@@ -1202,6 +1222,8 @@
 		28C077951A3B060E00834FE5 /* FxATests */ = {
 			isa = PBXGroup;
 			children = (
+				2FBD37E61AB8F353004833F8 /* FxALoginStateMachineTests.swift */,
+				28C077991A3B064F00834FE5 /* FxAClient10Tests.swift */,
 				28C077971A3B064000834FE5 /* CryptoTests.swift */,
 			);
 			name = FxATests;
@@ -1210,6 +1232,7 @@
 		28CE83B71A1D1D3200576538 /* FxAClient */ = {
 			isa = PBXGroup;
 			children = (
+				2FBD37E31AB8F33A004833F8 /* FxALoginStateMachine.swift */,
 				2F834D111A80629A006A0B7B /* FxASignIn.js */,
 				2F834D131A80629A006A0B7B /* FxAContentViewController.swift */,
 			);
@@ -2684,6 +2707,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				E4CD9F6D1A77DD2800318571 /* ReaderModeStyleViewController.swift in Sources */,
+				2F1BDFA11A85240400213B54 /* FirefoxAccountState.swift in Sources */,
+				2FBD37E41AB8F33A004833F8 /* FxALoginStateMachine.swift in Sources */,
 				D308E4E41A5306F500842685 /* SearchEngines.swift in Sources */,
 				28CE83C51A1D1D3200576538 /* EncryptedRecord.swift in Sources */,
 				0BF0DB941A8545800039F300 /* URLBarView.swift in Sources */,
@@ -2775,6 +2800,7 @@
 				28FEEE201AAFF11B007FA476 /* SyncMeta.swift in Sources */,
 				E42CCE021A24C4E300B794D3 /* ExtensionUtils.swift in Sources */,
 				0BF6483C1A9D003D00BA963C /* TopSitesPanel.swift in Sources */,
+				2FBD37E51AB8F33A004833F8 /* FxALoginStateMachine.swift in Sources */,
 				D38B2D501A8D96D00040E6B5 /* GCDWebServerFileResponse.m in Sources */,
 				D38B2D3B1A8D96D00040E6B5 /* GCDWebServerResponse.m in Sources */,
 				D38B2D411A8D96D00040E6B5 /* GCDWebServerFileRequest.m in Sources */,
@@ -2792,6 +2818,7 @@
 				28786E551AB0F5FA009EA9EF /* DeferredTests.swift in Sources */,
 				D3FA777B1A43B2990010CD32 /* SearchTests.swift in Sources */,
 				D38B2D441A8D96D00040E6B5 /* GCDWebServerMultiPartFormRequest.m in Sources */,
+				2FBD37E81AB8F353004833F8 /* FxALoginStateMachineTests.swift in Sources */,
 				E42475DD1AB73B9B00B23D33 /* SWCellScrollView.m in Sources */,
 				D3C744CE1A687D6C004CE85D /* URIFixup.swift in Sources */,
 				D38B2D3E1A8D96D00040E6B5 /* GCDWebServerDataRequest.m in Sources */,
@@ -2838,6 +2865,10 @@
 				E42CCE031A24C4E300B794D3 /* ExtensionUtils.swift in Sources */,
 				E418D0D91A251B3200CAE47A /* Profile.swift in Sources */,
 				F8708D321A0970B70051AB07 /* ShareViewController.swift in Sources */,
+				2F1BDFA51A85242600213B54 /* json.swift in Sources */,
+				2F1BDFA31A85240400213B54 /* FirefoxAccountState.swift in Sources */,
+				2FBD37C41AB8F322004833F8 /* HexExtensions.swift in Sources */,
+				2F998FD71AA516380063E75D /* FirefoxAccountConfiguration.swift in Sources */,
 				E418D0DF1A251B3200CAE47A /* RestAPI.swift in Sources */,
 				28CDA55C1A43C37C005C318C /* ProfilePrefs.swift in Sources */,
 				E41A7D4B1A1BE04500245963 /* InitialViewController.swift in Sources */,
@@ -2851,6 +2882,7 @@
 				2F26574D1A85775F0057F2DE /* KeychainWrapper.swift in Sources */,
 				282DA4691A68C13400A406E2 /* Clients.swift in Sources */,
 				D38B2D8B1A8D98D10040E6B5 /* SearchEngines.swift in Sources */,
+				2FBD37E21AB8F322004833F8 /* HexExtensions.swift in Sources */,
 				D3C744D01A687D6C004CE85D /* URIFixup.swift in Sources */,
 				E42CCDEA1A23A74400B794D3 /* RestAPI.swift in Sources */,
 				D38B2D8D1A8D98DA0040E6B5 /* OpenSearch.swift in Sources */,

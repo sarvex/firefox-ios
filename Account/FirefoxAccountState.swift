@@ -7,6 +7,7 @@ import FxA
 
 public enum FirefoxAccountStateLabel: String {
     case Engaged = "engaged"
+    case CohabitingWithoutKeyPair = "cohabitingWithoutKeyPair"
     case Cohabiting = "cohabiting"
     case Married = "married"
     case Separated = "separated"
@@ -86,15 +87,11 @@ public class FirefoxAccountState {
         let sessionToken: NSData
         let kA: NSData
         let kB: NSData
-        // TODO: make key pair required.
-        // TODO: maintain key pair issued at timestamp for key rotation.
-        let keyPair: KeyPair?
 
-        init(label: FirefoxAccountStateLabel, sessionToken: NSData, kA: NSData, kB: NSData, keyPair: KeyPair?) {
+        init(label: FirefoxAccountStateLabel, sessionToken: NSData, kA: NSData, kB: NSData) {
             self.sessionToken = sessionToken
             self.kA = kA
             self.kB = kB
-            self.keyPair = keyPair
             super.init(label: label, verified: true)
         }
 
@@ -102,7 +99,6 @@ public class FirefoxAccountState {
             var d = super.asDictionary()
             d["kA"] = kA.base16EncodedStringWithOptions(NSDataBase16EncodingOptions.LowerCase)
             d["kB"] = kB.base16EncodedStringWithOptions(NSDataBase16EncodingOptions.LowerCase)
-            // TODO: persist key pair.
             return d
         }
 
@@ -111,25 +107,76 @@ public class FirefoxAccountState {
         }
     }
 
-    public class Cohabiting: TokenAndKeys {
-        init(sessionToken: NSData, kA: NSData, kB: NSData, keyPair: KeyPair?) {
-            super.init(label: .Cohabiting, sessionToken: sessionToken, kA: kA, kB: kB, keyPair: keyPair)
+
+    public class TokenKeysAndKeyPair: TokenAndKeys {
+        let keyPair: KeyPair
+        // Timestamp, in milliseconds after the epoch, when keyPair expires.  After this time, generate a new keyPair.
+        let keyPairExpiresAt: Int64
+
+        init(label: FirefoxAccountStateLabel, sessionToken: NSData, kA: NSData, kB: NSData, keyPair: KeyPair, keyPairExpiresAt: Int64) {
+            self.keyPair = keyPair
+            self.keyPairExpiresAt = keyPairExpiresAt
+            super.init(label: label, sessionToken: sessionToken, kA: kA, kB: kB)
+        }
+
+        override func asDictionary() -> [String: AnyObject] {
+            var d = super.asDictionary()
+            d["keyPairExpiresAt"] = NSNumber(longLong: keyPairExpiresAt)
+            d["keyPair"] = keyPair.JSONRepresentation()
+            return d
+        }
+
+        func isKeyPairExpired(now: Int64) -> Bool {
+            return keyPairExpiresAt < now
         }
     }
 
-    public class Married: TokenAndKeys {
-        // TODO: Maintain certificate issued at timestamp for invalidation.
-        let certificate: String
 
-        init(sessionToken: NSData, kA: NSData, kB: NSData, keyPair: KeyPair?, certificate: String) {
+
+    public class CohabitingWithoutKeyPair: TokenAndKeys {
+        init(sessionToken: NSData, kA: NSData, kB: NSData) {
+            super.init(label: .CohabitingWithoutKeyPair, sessionToken: sessionToken, kA: kA, kB: kB)
+        }
+    }
+
+    public class Cohabiting: TokenKeysAndKeyPair {
+        init(sessionToken: NSData, kA: NSData, kB: NSData, keyPair: KeyPair, keyPairExpiresAt: Int64) {
+            super.init(label: .Cohabiting, sessionToken: sessionToken, kA: kA, kB: kB, keyPair: keyPair, keyPairExpiresAt: keyPairExpiresAt)
+        }
+    }
+
+    public class Married: TokenKeysAndKeyPair {
+        let certificate: String
+        let certificateExpiresAt: Int64
+
+        init(sessionToken: NSData, kA: NSData, kB: NSData, keyPair: KeyPair, keyPairExpiresAt: Int64, certificate: String, certificateExpiresAt: Int64) {
             self.certificate = certificate
-            super.init(label: .Married, sessionToken: sessionToken, kA: kA, kB: kB, keyPair: keyPair)
+            self.certificateExpiresAt = certificateExpiresAt
+            super.init(label: .Married, sessionToken: sessionToken, kA: kA, kB: kB, keyPair: keyPair, keyPairExpiresAt: keyPairExpiresAt)
         }
 
         override func asDictionary() -> [String: AnyObject] {
             var d = super.asDictionary()
             d["certificate"] = certificate
+            d["certificateExpiresAt"] = NSNumber(longLong: certificateExpiresAt)
             return d
+        }
+
+        func isCertificateExpired(now: Int64) -> Bool {
+            return certificateExpiresAt < now
+        }
+
+        func withoutKeyPair() -> FirefoxAccountState.CohabitingWithoutKeyPair {
+            let newState = FirefoxAccountState.CohabitingWithoutKeyPair(sessionToken: sessionToken,
+                kA: kA, kB: kB)
+            return newState
+        }
+
+        func withoutCertificate() -> FirefoxAccountState.Cohabiting {
+            let newState = FirefoxAccountState.Cohabiting(sessionToken: sessionToken,
+                kA: kA, kB: kB,
+                keyPair: keyPair, keyPairExpiresAt: keyPairExpiresAt)
+            return newState
         }
     }
 
@@ -169,20 +216,32 @@ public class FirefoxAccountState {
                     let unwrapkB = NSData(base16EncodedString: dictionary["unwrapkB"] as String, options: NSDataBase16DecodingOptions.allZeros)
                     return Engaged(verified: verified, sessionToken: sessionToken, keyFetchToken: keyFetchToken, unwrapkB: unwrapkB)
 
+                case .CohabitingWithoutKeyPair:
+                    let sessionToken = NSData(base16EncodedString: dictionary["sessionToken"] as String, options: NSDataBase16DecodingOptions.allZeros)
+                    let kA = NSData(base16EncodedString: dictionary["kA"] as String, options: NSDataBase16DecodingOptions.allZeros)
+                    let kB = NSData(base16EncodedString: dictionary["kB"] as String, options: NSDataBase16DecodingOptions.allZeros)
+                    return CohabitingWithoutKeyPair(sessionToken: sessionToken, kA: kA, kB: kB)
+
                 case .Cohabiting:
                     let sessionToken = NSData(base16EncodedString: dictionary["sessionToken"] as String, options: NSDataBase16DecodingOptions.allZeros)
                     let kA = NSData(base16EncodedString: dictionary["kA"] as String, options: NSDataBase16DecodingOptions.allZeros)
                     let kB = NSData(base16EncodedString: dictionary["kB"] as String, options: NSDataBase16DecodingOptions.allZeros)
-                    // TODO: extract key pair.
-                    return Cohabiting(sessionToken: sessionToken, kA: kA, kB: kB, keyPair: nil)
+                    let keyPairExpiresAt = dictionary["keyPairExpiresAt"] as NSNumber
+                    let keyPair = RSAKeyPair(JSONRepresentation: dictionary["keyPair"] as [String: AnyObject])
+                    return Cohabiting(sessionToken: sessionToken, kA: kA, kB: kB,
+                        keyPair: keyPair, keyPairExpiresAt: keyPairExpiresAt.longLongValue)
 
                 case .Married:
                     let sessionToken = NSData(base16EncodedString: dictionary["sessionToken"] as String, options: NSDataBase16DecodingOptions.allZeros)
                     let kA = NSData(base16EncodedString: dictionary["kA"] as String, options: NSDataBase16DecodingOptions.allZeros)
                     let kB = NSData(base16EncodedString: dictionary["kB"] as String, options: NSDataBase16DecodingOptions.allZeros)
-                    // TODO: extract key pair.
+                    let keyPair = RSAKeyPair(JSONRepresentation: dictionary["keyPair"] as [String: AnyObject])
+                    let keyPairExpiresAt = dictionary["keyPairExpiresAt"] as NSNumber
                     let certificate = dictionary["certificate"] as String
-                    return Married(sessionToken: sessionToken, kA: kA, kB: kB, keyPair: nil, certificate: certificate)
+                    let certificateExpiresAt = dictionary["certificateExpiresAt"] as NSNumber
+                    return Married(sessionToken: sessionToken, kA: kA, kB: kB,
+                        keyPair: keyPair, keyPairExpiresAt: keyPairExpiresAt.longLongValue,
+                        certificate: certificate, certificateExpiresAt: certificateExpiresAt.longLongValue)
 
                 case .Doghouse:
                     return Doghouse()
