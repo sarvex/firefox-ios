@@ -7,18 +7,45 @@ import XCTest
 
 class StorageClientTests: XCTestCase {
 
-    // Trivial test for struct semantics that we might want to pay attention to if they change.
-    func testStructSemantics() {
-        let x: StorageResponse<JSON> = StorageResponse<JSON>(value: JSON.parse("{\"a:\": 2}"), lastModified: 5)
+    func testNumeric() {
+        let m = ResponseMetadata(headers: [
+            "X-Last-Modified": "2174380461.12",
+        ])
+        XCTAssertTrue(m.lastModifiedMilliseconds == 2174380461120)
+    }
+
+    // Trivial test for struct semantics that we might want to pay attention to if they change,
+    // and for response header parsing.
+    func testResponseHeaders() {
+        let v: JSON = JSON.parse("{\"a:\": 2}")
+        let m = ResponseMetadata(headers: [
+            "X-Weave-Timestamp": "1274380461.12",
+            "X-Last-Modified":   "2174380461.12",
+            "X-Weave-Next-Offset": "abdef",
+            ])
+
+        XCTAssertTrue(m.lastModifiedMilliseconds == 2174380461120)
+        XCTAssertTrue(m.timestampMilliseconds    == 1274380461120)
+        XCTAssertTrue(m.nextOffset == "abdef")
+
+        // Just to avoid consistent overflow allowing ==.
+        XCTAssertTrue(m.lastModifiedMilliseconds?.description == "2174380461120")
+        XCTAssertTrue(m.timestampMilliseconds.description == "1274380461120")
+
+        let x: StorageResponse<JSON> = StorageResponse<JSON>(value: v, metadata: m)
 
         func doTesting(y: StorageResponse<JSON>) {
-
-            XCTAssertTrue(y.lastModified == x.lastModified, "lastModified is the same.")
-            XCTAssertTrue(y.lastModified == 5, "lastModified is 5.")
-
             // Make sure that reference fields in a struct are copies of the same reference,
             // not references to a copy.
             XCTAssertTrue(x.value === y.value)
+
+            XCTAssertTrue(y.metadata.lastModifiedMilliseconds == x.metadata.lastModifiedMilliseconds, "lastModified is the same.")
+
+            XCTAssertTrue(x.metadata.quotaRemaining == nil, "No quota.")
+            XCTAssertTrue(y.metadata.lastModifiedMilliseconds == 2174380461120, "lastModified is correct.")
+            XCTAssertTrue(x.metadata.timestampMilliseconds == 1274380461120, "timestamp is correct.")
+            XCTAssertTrue(x.metadata.nextOffset == "abdef", "nextOffset is correct.")
+            XCTAssertTrue(x.metadata.records == nil, "No X-Weave-Records.")
         }
 
         doTesting(x)
