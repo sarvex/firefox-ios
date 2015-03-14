@@ -4,8 +4,7 @@
 
 import Foundation
 import Alamofire
-import Deferred
-import Result
+import Shared
 
 
 public class RecordParseError : ErrorType {
