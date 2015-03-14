@@ -14,10 +14,34 @@ public class RecordParseError : ErrorType {
     }
 }
 
+extension NSScanner {
+    func scanLongLong() -> Int64? {
+        var value: Int64 = 0
+        if scanLongLong(&value) {
+            return value
+        }
+        return nil
+    }
+
+    func scanDouble() -> Double? {
+        var value: Double = 0
+        if scanDouble(&value) {
+            return value
+        }
+        return nil
+    }
+}
+
 // Returns milliseconds. Handles decimals.
 private func optionalSecondsHeader(input: AnyObject?) -> Int64? {
     if input == nil {
         return nil
+    }
+
+    if let val = input as? String {
+        if let double = NSScanner(string: val).scanDouble() {
+            return Int64(double * 1000)
+        }
     }
 
     if let seconds: Double = input as? Double {
@@ -25,13 +49,9 @@ private func optionalSecondsHeader(input: AnyObject?) -> Int64? {
         return Int64(seconds * 1000)
     }
 
-    if let seconds: Int64 = input as? Int64 {
+    if let seconds: NSNumber = input as? NSNumber {
         // Who knows.
-        return seconds * 1000
-    }
-
-    if let val = input as? String {
-        return Int64(Double(val) * 1000)
+        return seconds.longLongValue * 1000
     }
 
     return nil
@@ -42,16 +62,18 @@ private func optionalIntegerHeader(input: AnyObject?) -> Int64? {
         return nil
     }
 
-    if let val: Double = input as? Double {
-        return Int64(val)
-    }
-
-    if let val: Int64 = input as? Int64 {
-        return val
-    }
-
     if let val = input as? String {
+        return NSScanner(string: val).scanLongLong()
+    }
+
+    if let val: Double = input as? Double {
+        // Oh for a BigDecimal library.
         return Int64(val)
+    }
+
+    if let val: NSNumber = input as? NSNumber {
+        // Who knows.
+        return val.longLongValue
     }
 
     return nil
@@ -63,18 +85,20 @@ public struct ResponseMetadata {
     public let records: Int64?
     public let quotaRemaining: Int64?
     public let timestampMilliseconds: Int64        // Non-optional.
+    public let lastModifiedMilliseconds: Int64?                // Included for all success responses.
     public let backoffMilliseconds: Int64?
     public let retryAfterMilliseconds: Int64?
 
     public init(headers: [NSObject : AnyObject]) {
-        self(alert: headers["X-Weave-Alert"] as? String,
-             nextOffset: headers["X-Weave-Next-Offset"] as? String,
-             records: optionalIntegerHeader(headers["X-Weave-Records"]),
-             quotaRemaining: optionalIntegerHeader(headers["X-Weave-Quota-Remaining"]),
-             timestampMilliseconds: optionalSecondsHeader(headers["X-Weave-Timestamp"]) ?? -1,
-             backoffMilliseconds: optionalSecondsHeader(headers["X-Weave-Backoff"]) ??
-                                  optionalSecondsHeader(headers["X-Backoff"]),
-             retryAfterMilliseconds: optionalSecondsHeader(headers["Retry-After"]))
+        alert = headers["X-Weave-Alert"] as? String
+        nextOffset = headers["X-Weave-Next-Offset"] as? String
+        records = optionalIntegerHeader(headers["X-Weave-Records"])
+        quotaRemaining = optionalIntegerHeader(headers["X-Weave-Quota-Remaining"])
+        timestampMilliseconds = optionalSecondsHeader(headers["X-Weave-Timestamp"]) ?? -1
+        lastModifiedMilliseconds = optionalSecondsHeader(headers["X-Last-Modified"])
+        backoffMilliseconds = optionalSecondsHeader(headers["X-Weave-Backoff"]) ??
+                              optionalSecondsHeader(headers["X-Backoff"])
+        retryAfterMilliseconds = optionalSecondsHeader(headers["Retry-After"])
     }
 }
 
@@ -115,7 +139,7 @@ public class Sync15StorageClient<T : CleartextPayloadJSON> {
     }
 
     public func get(guid: String) -> Deferred<Result<StorageResponse<Record<T>>>> {
-        let deferred = Deferred<Result<Record<T>>>(defaultQueue: self.resultQueue)
+        let deferred = Deferred<Result<StorageResponse<Record<T>>>>(defaultQueue: self.resultQueue)
 
         let req = requestGET(uriForRecord(guid))
         req.responseJSON { (_, response, data, error) in
@@ -124,13 +148,18 @@ public class Sync15StorageClient<T : CleartextPayloadJSON> {
                 return
             }
 
+            if response == nil {
+                // TODO: better error.
+                deferred.fill(Result(failure: RecordParseError()))
+            }
+
             if let json: JSON = data as? JSON {
                 let envelope = EnvelopeJSON(json)
                 let record = Record<T>.fromEnvelope(envelope, payloadFactory: self.factory)
                 if let record = record {
-                    let metadata = ResponseMetadata(headers: response.allHeaderFields)
-                    let response = StorageResponse(value: record, metadata: metadata)
-                    deferred.fill(Result(success: response))
+                    let metadata = ResponseMetadata(headers: response!.allHeaderFields)
+                    let storageResponse = StorageResponse(value: record, metadata: metadata)
+                    deferred.fill(Result(success: storageResponse))
                     return
                 }
             }
@@ -148,7 +177,7 @@ public class Sync15StorageClient<T : CleartextPayloadJSON> {
      * another Serializer, and we're loading everything into memory anyway.
      */
     public func getSince(since: Int64) -> Deferred<Result<StorageResponse<[Record<T>]>>> {
-        let deferred = Deferred<Result<[Record<T>]>>(defaultQueue: self.resultQueue)
+        let deferred = Deferred<Result<StorageResponse<[Record<T>]>>>(defaultQueue: self.resultQueue)
 
         let req = requestGET(self.serverURI)
         req.responseJSON { (_, response, data, error) in
@@ -157,13 +186,18 @@ public class Sync15StorageClient<T : CleartextPayloadJSON> {
                 return
             }
 
+            if response == nil {
+                // TODO: better error.
+                deferred.fill(Result(failure: RecordParseError()))
+            }
+
             if let json: JSON = data as? JSON {
                 func recordify(json: JSON) -> Record<T>? {
                     let envelope = EnvelopeJSON(json)
                     return Record<T>.fromEnvelope(envelope, payloadFactory: self.factory)
                 }
                 if let arr = json.asArray? {
-                    let metadata = ResponseMetadata(headers: response.allHeaderFields)
+                    let metadata = ResponseMetadata(headers: response!.allHeaderFields)
                     let response = StorageResponse(value: optFilter(arr.map(recordify)), metadata: metadata)
                     deferred.fill(Result(success: response))
                     return
