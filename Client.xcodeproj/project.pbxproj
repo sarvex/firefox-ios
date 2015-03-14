@@ -34,6 +34,10 @@
 		282DA4691A68C13400A406E2 /* Clients.swift in Sources */ = {isa = PBXBuildFile; fileRef = E42CCDE21A23A6F900B794D3 /* Clients.swift */; };
 		282DA4731A68C1E700A406E2 /* OpenSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FA77831A43B2CE0010CD32 /* OpenSearch.swift */; };
 		282DA4811A697EB100A406E2 /* RestAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34DC8521A16C40C00D49B7B /* RestAPI.swift */; };
+		283306E91AB3BB87008999AC /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 283306E81AB3BB87008999AC /* Functions.swift */; };
+		283306EA1AB3BB87008999AC /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 283306E81AB3BB87008999AC /* Functions.swift */; };
+		285CEE4B1A69EAF600CC1228 /* Storage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 282DA4BA1A699E0400A406E2 /* Storage.framework */; };
+		285CEE4F1A69EAFD00CC1228 /* Storage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 282DA4BA1A699E0400A406E2 /* Storage.framework */; };
 		28786E551AB0F5FA009EA9EF /* DeferredTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28786E541AB0F5FA009EA9EF /* DeferredTests.swift */; };
 		288A2D9D1AB8B3260023ABC3 /* Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288A2D861AB8B3260023ABC3 /* Shared.framework */; };
 		288A2D9E1AB8B3260023ABC3 /* Shared.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 288A2D861AB8B3260023ABC3 /* Shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -829,6 +833,7 @@
 		288A2DAF1AB8B37E0023ABC3 /* ReadWriteLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ReadWriteLock.swift; path = Carthage/Checkouts/Deferred/Deferred/ReadWriteLock.swift; sourceTree = "<group>"; };
 		288A2DB31AB8B38D0023ABC3 /* Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Error.swift; path = ThirdParty/Result/Error.swift; sourceTree = "<group>"; };
 		288A2DB41AB8B38D0023ABC3 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Result.swift; path = ThirdParty/Result/Result.swift; sourceTree = "<group>"; };
+		283306E81AB3BB87008999AC /* Functions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		28C077971A3B064000834FE5 /* CryptoTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CryptoTests.swift; sourceTree = "<group>"; };
 		28C0779D1A3B066000834FE5 /* RecordTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RecordTests.swift; path = SyncTests/RecordTests.swift; sourceTree = "<group>"; };
 		28CE83BB1A1D1D3200576538 /* ClientPayload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientPayload.swift; sourceTree = "<group>"; };
@@ -1647,6 +1652,7 @@
 				D39999A81AA01D65005AED21 /* KeyboardHelper.swift */,
 				D35275151AA8D13B00E9C906 /* ColorUtils.swift */,
 				2F3444561AB22A4B00FD9731 /* TimeConstants.swift */,
+				283306E81AB3BB87008999AC /* Functions.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -2742,6 +2748,7 @@
 				2FDE87FE1ABB3817005317B1 /* RemoteTabsPanel.swift in Sources */,
 				D31A0FC71A65D6D000DC8C7E /* SearchSuggestClient.swift in Sources */,
 				D38B2D311A8D96D00040E6B5 /* GCDWebServerConnection.m in Sources */,
+				283306E91AB3BB87008999AC /* Functions.swift in Sources */,
 				D38B2D401A8D96D00040E6B5 /* GCDWebServerFileRequest.m in Sources */,
 				D38B2D4F1A8D96D00040E6B5 /* GCDWebServerFileResponse.m in Sources */,
 				E43A4E551A96B88100E25676 /* GCDWebServerDataRequest.m in Sources */,
@@ -2802,6 +2809,8 @@
 				0BF6483C1A9D003D00BA963C /* TopSitesPanel.swift in Sources */,
 				2FBD37E51AB8F33A004833F8 /* FxALoginStateMachine.swift in Sources */,
 				D38B2D501A8D96D00040E6B5 /* GCDWebServerFileResponse.m in Sources */,
+				28C0779C1A3B065800834FE5 /* TokenServerClientTests.swift in Sources */,
+				283306EA1AB3BB87008999AC /* Functions.swift in Sources */,
 				D38B2D3B1A8D96D00040E6B5 /* GCDWebServerResponse.m in Sources */,
 				D38B2D411A8D96D00040E6B5 /* GCDWebServerFileRequest.m in Sources */,
 				28FEEDFF1AAFF046007FA476 /* Records.swift in Sources */,
