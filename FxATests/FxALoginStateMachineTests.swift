@@ -91,7 +91,7 @@ class FxALoginStateMachineTests: XCTestCase {
 
         // Advancing from an Engaged state correctly XORs the keys.
         let unwrapkB = client.wrapkB // This way we get all 0s, which is easy to test.
-        let engagedState = FirefoxAccountState.Engaged(verified: true,
+        let engagedState = FirefoxAccountState.Engaged(
             sessionToken: NSData.randomOfLength(32)!, keyFetchToken: NSData.randomOfLength(32)!,
             unwrapkB: unwrapkB)
 

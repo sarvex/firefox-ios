@@ -6,6 +6,7 @@ import Foundation
 import FxA
 
 public enum FirefoxAccountStateLabel: String {
+    case Unverified = "unverified"
     case Engaged = "engaged"
     case CohabitingWithoutKeyPair = "cohabitingWithoutKeyPair"
     case Cohabiting = "cohabiting"
@@ -53,21 +54,20 @@ public class FirefoxAccountState {
         }
     }
 
-    public class Engaged: FirefoxAccountState {
+    public class ReadyForKeys: FirefoxAccountState {
         let sessionToken: NSData
         let keyFetchToken: NSData
         let unwrapkB: NSData
 
-        public init(verified: Bool, sessionToken: NSData, keyFetchToken: NSData, unwrapkB: NSData) {
+        public init(label: FirefoxAccountStateLabel, verified: Bool, sessionToken: NSData, keyFetchToken: NSData, unwrapkB: NSData) {
             self.sessionToken = sessionToken
             self.keyFetchToken = keyFetchToken
             self.unwrapkB = unwrapkB
-            super.init(label: .Engaged, verified: verified)
+            super.init(label: label, verified: verified)
         }
 
         override func asDictionary() -> [String: AnyObject] {
             var d = super.asDictionary()
-            d["verified"] = self.verified
             d["sessionToken"] = sessionToken.base16EncodedStringWithOptions(NSDataBase16EncodingOptions.LowerCase)
             d["keyFetchToken"] = keyFetchToken.base16EncodedStringWithOptions(NSDataBase16EncodingOptions.LowerCase)
             d["unwrapkB"] = unwrapkB.base16EncodedStringWithOptions(NSDataBase16EncodingOptions.LowerCase)
@@ -80,6 +80,25 @@ public class FirefoxAccountState {
             } else {
                 return .NeedsVerification
             }
+        }
+    }
+
+    public class Unverified: ReadyForKeys {
+        // Timestamp, in milliseconds after the epoch, when we first knew the account was unverified.
+        // Use this to avoid nagging the user to verify her account immediately after connecting.
+        let knownUnverifiedAt: Int64
+
+        public init(knownUnverifiedAt: Int64, sessionToken: NSData, keyFetchToken: NSData, unwrapkB: NSData) {
+            self.knownUnverifiedAt = knownUnverifiedAt
+            super.init(label: .Unverified, verified: false,
+                sessionToken: sessionToken, keyFetchToken: keyFetchToken, unwrapkB: unwrapkB)
+        }
+    }
+
+    public class Engaged: ReadyForKeys {
+        public init(sessionToken: NSData, keyFetchToken: NSData, unwrapkB: NSData) {
+            super.init(label: .Engaged, verified: true,
+                sessionToken: sessionToken, keyFetchToken: keyFetchToken, unwrapkB: unwrapkB)
         }
     }
 
@@ -209,12 +228,18 @@ public class FirefoxAccountState {
                 case .Separated:
                     return Separated()
 
+                case .Unverified:
+                    let knownUnverifiedAt = dictionary["knownUnverifiedAt"] as NSNumber
+                    let sessionToken = (dictionary["sessionToken"] as String).hexDecodedData
+                    let keyFetchToken = (dictionary["keyFetchToken"] as String).hexDecodedData
+                    let unwrapkB = (dictionary["unwrapkB"] as String).hexDecodedData
+                    return Unverified(knownUnverifiedAt: knownUnverifiedAt.longLongValue, sessionToken: sessionToken, keyFetchToken: keyFetchToken, unwrapkB: unwrapkB)
+
                 case .Engaged:
-                    let verified = dictionary["verified"] as Bool
-                    let sessionToken = NSData(base16EncodedString: dictionary["sessionToken"] as String, options: NSDataBase16DecodingOptions.allZeros)
-                    let keyFetchToken = NSData(base16EncodedString: dictionary["keyFetchToken"] as String, options: NSDataBase16DecodingOptions.allZeros)
-                    let unwrapkB = NSData(base16EncodedString: dictionary["unwrapkB"] as String, options: NSDataBase16DecodingOptions.allZeros)
-                    return Engaged(verified: verified, sessionToken: sessionToken, keyFetchToken: keyFetchToken, unwrapkB: unwrapkB)
+                    let sessionToken = (dictionary["sessionToken"] as String).hexDecodedData
+                    let keyFetchToken = (dictionary["keyFetchToken"] as String).hexDecodedData
+                    let unwrapkB = (dictionary["unwrapkB"] as String).hexDecodedData
+                    return Engaged(sessionToken: sessionToken, keyFetchToken: keyFetchToken, unwrapkB: unwrapkB)
 
                 case .CohabitingWithoutKeyPair:
                     let sessionToken = NSData(base16EncodedString: dictionary["sessionToken"] as String, options: NSDataBase16DecodingOptions.allZeros)

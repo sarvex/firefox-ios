@@ -174,12 +174,22 @@ extension SettingsTableViewController: FxAContentViewControllerDelegate {
         }
 
         // TODO: Error handling.
-        let state = FirefoxAccountState.Engaged(
-            verified: data["verified"].asBool ?? false,
-            sessionToken: data["sessionToken"].asString!.hexDecodedData,
-            keyFetchToken: data["keyFetchToken"].asString!.hexDecodedData,
-            unwrapkB: data["unwrapBKey"].asString!.hexDecodedData
-        )
+        let verified = data["verified"].asBool ?? false
+        var state: FirefoxAccountState! = nil
+        if !verified {
+            let knownUnverifiedAt: Int64 = Int64(NSDate().timeIntervalSince1970 * 1000)
+            state = FirefoxAccountState.Unverified(knownUnverifiedAt: knownUnverifiedAt,
+                sessionToken: data["sessionToken"].asString!.hexDecodedData,
+                keyFetchToken: data["keyFetchToken"].asString!.hexDecodedData,
+                unwrapkB: data["unwrapBKey"].asString!.hexDecodedData
+            )
+        } else {
+            state = FirefoxAccountState.Engaged(
+                sessionToken: data["sessionToken"].asString!.hexDecodedData,
+                keyFetchToken: data["keyFetchToken"].asString!.hexDecodedData,
+                unwrapkB: data["unwrapBKey"].asString!.hexDecodedData
+            )
+        }
 
         let account = FirefoxAccount(
             email: data["email"].asString!,

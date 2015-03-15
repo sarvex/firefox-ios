@@ -164,10 +164,12 @@ class FxALoginStateMachine {
                 callback(nil, newState)
             }
 
-        case .Engaged:
-            let state = state as FirefoxAccountState.Engaged
+        case .Unverified, .Engaged:
+            let state = state as FirefoxAccountState.ReadyForKeys
             client.fetchSyncKeysWithKeyFetchToken(state.keyFetchToken) { (error, twoKeys) in
                 // XXX interrogate error to go to Separated state.
+                // Or remain at current state, if Unverified.
+                // XXX ensure that keyFetchToken is still valid!
                 if error != nil {
                     callback(error, nil)
                     return
