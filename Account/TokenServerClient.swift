@@ -71,6 +71,18 @@ class TokenServerClient {
         return nil
     }
 
+    /**
+     * The token server accepts an X-Client-State header, which is the
+     * lowercase-hex-encoded first 16 bytes of the SHA-256 hash of the
+     * bytes of kB.
+     */
+    class func computeClientState(kB: NSData) -> Result<String> {
+        if kB.length != 32 {
+            return Result(failure: TokenServerClientUnknownError)
+        }
+        return Result(success: kB.sha256.subdataWithRange(NSRange(location: 0, length: 16)).hexEncodedString)
+    }
+
     func token(assertion: String, clientState: String? = nil) -> Deferred<Result<TokenServerToken>> {
         let deferred = Deferred<Result<TokenServerToken>>()
 
