@@ -75,4 +75,40 @@ class LiveAccountTest: XCTestCase {
             }
         }
     }
+
+    func withState(email: String, password: String) -> Deferred<Result<FirefoxAccountState>> {
+        let emailUTF8 = email.utf8EncodedData!
+        let password = password.utf8EncodedData!
+        let stretchedPW = FxAClient10.quickStretchPW(emailUTF8, password: password)
+
+        let client = FxAClient10()
+
+        let login: Deferred<Result<FxALoginResponse>> = client.login(emailUTF8, quickStretchedPW: stretchedPW, getKeys: true)
+        return login.bind { loginResult in
+            switch loginResult {
+            case let .Failure(error):
+                return Deferred(value: .Failure(error))
+            case let .Success(loginResponse):
+                let loginResponse = loginResponse.value
+                let unwrapkB = FxAClient10.computeUnwrapKey(stretchedPW)
+                let now = Int64(NSDate().timeIntervalSince1970 * 1000)
+                var state: FirefoxAccountState! = nil
+                if !loginResponse.verified {
+                    state = FirefoxAccountState.Unverified(knownUnverifiedAt: now, sessionToken: loginResponse.sessionToken, keyFetchToken: loginResponse.keyFetchToken, unwrapkB: unwrapkB)
+                } else {
+                    state = FirefoxAccountState.Engaged(sessionToken: loginResponse.sessionToken, keyFetchToken: loginResponse.keyFetchToken, unwrapkB: unwrapkB)
+                }
+                let deferred = Deferred<Result<FirefoxAccountState>>()
+                let loginClient = FxALoginClient10(client: client)
+                FxALoginStateMachine(client: loginClient).advanceFromState(state, now: now) { (error, state) in
+                    if let error = error {
+                        deferred.fill(Result(failure: error))
+                    } else {
+                        deferred.fill(Result(success: state))
+                    }
+                }
+                return deferred
+            }
+        }
+    }
 }

@@ -4,6 +4,7 @@
 
 import Foundation
 import FxA
+import Shared
 
 public enum FirefoxAccountStateLabel: String {
     case Unverified = "unverified"
@@ -196,6 +197,12 @@ public class FirefoxAccountState {
                 kA: kA, kB: kB,
                 keyPair: keyPair, keyPairExpiresAt: keyPairExpiresAt)
             return newState
+        }
+
+        func generateAssertionForAudience(audience: String) -> String {
+            let assertion = JSONWebTokenUtils.createAssertionWithPrivateKeyToSignWith(keyPair.privateKey,
+                certificate: certificate, audience: audience)
+            return assertion
         }
     }
 

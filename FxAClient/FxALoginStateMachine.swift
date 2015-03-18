@@ -58,13 +58,46 @@ struct KeyPairResult {
     }
 }
 
-protocol FxAClient {
+protocol FxALoginClient {
     func fetchSyncKeysWithKeyFetchToken(keyFetchToken: NSData, callback: (NSError?, TwoKeys!) -> Void) -> Void
     func generateKeyPairAt(now: Int64, callback: (NSError?, KeyPairResult!) -> Void) -> Void
     func signPublicKey(publicKey: PublicKey, withSessionToken: NSData, at now: Int64, callback: (NSError?, CertificateAndExpiration!) -> Void) -> Void
 }
 
-class MockFxAClient10: FxAClient {
+class FxALoginClient10: FxALoginClient {
+    let client: FxAClient10
+
+    init(client: FxAClient10) {
+        self.client = client
+    }
+
+    func generateKeyPairAt(now: Int64, callback: (NSError?, KeyPairResult!) -> Void) -> Void {
+        let result = KeyPairResult(keyPair: RSAKeyPair.generateKeyPairWithModulusSize(1024), expiresAt: now + OneMonthInMilliseconds)
+        callback(nil, result)
+    }
+
+    func fetchSyncKeysWithKeyFetchToken(keyFetchToken: NSData, callback: (NSError?, TwoKeys!) -> Void) -> Void {
+        client.keys(keyFetchToken).upon { keysResult in
+            if let keysResponse = keysResult.successValue {
+                callback(nil, TwoKeys(kA: keysResponse.kA, wrapkB: keysResponse.wrapkB)!)
+            } else {
+                callback(keysResult.failureValue as? NSError, nil)
+            }
+        }
+    }
+
+    func signPublicKey(publicKey: PublicKey, withSessionToken sessionToken: NSData, at now: Int64, callback: (NSError?, CertificateAndExpiration!) -> Void) -> Void {
+        client.sign(sessionToken, publicKey: publicKey).upon { signResult in
+            if let signResponse = signResult.successValue {
+                callback(nil, CertificateAndExpiration(certificate: signResponse.certificate, expiresAt: now + OneDayInMilliseconds))
+            } else {
+                callback(signResult.failureValue as? NSError, nil)
+            }
+        }
+    }
+}
+
+class MockFxAClient10: FxALoginClient {
     // Fixed per mock client, for testing.
     let kA = NSData.randomOfLength(32)!
     let wrapkB = NSData.randomOfLength(32)!
@@ -90,9 +123,9 @@ class MockFxAClient10: FxAClient {
 }
 
 class FxALoginStateMachine {
-    let client: FxAClient
+    let client: FxALoginClient
 
-    init(client: FxAClient) {
+    init(client: FxALoginClient) {
         self.client = client
     }
 

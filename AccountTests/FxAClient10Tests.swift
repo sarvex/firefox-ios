@@ -120,4 +120,32 @@ class FxAClient10Tests: LiveAccountTest {
         }
         self.waitForExpectationsWithTimeout(10, handler: nil)
     }
+
+    func testSync() {
+        let e = self.expectationWithDescription("")
+        let state = withState("testtesto@mockmyid.com", password: "testtesto@mockmyid.com")
+        let token = state.bind { (stateResult: Result<FirefoxAccountState>) -> Deferred<Result<TokenServerToken>> in
+            if let state = stateResult.successValue {
+                if let married = state as? FirefoxAccountState.Married {
+                    let audience = TokenServerClient.getAudienceForURL(ProductionSync15Configuration().tokenServerEndpointURL)
+                    let clientState = FxAClient10.computeClientState(married.kB)
+                    let client = TokenServerClient()
+                    return client.token(married.generateAssertionForAudience(audience), clientState: clientState)
+                } else {
+                    return Deferred(value: Result(failure: NSError(domain: "foo", code: 0, userInfo: nil)))
+                }
+            } else {
+                return Deferred(value: Result(failure: stateResult.failureValue!))
+            }
+        }
+        token.upon { tokenResult in
+            if let token = tokenResult.successValue {
+                XCTAssertEqual("", token.api_endpoint)
+            } else {
+                XCTAssertNil(tokenResult.failureValue as? NSError)
+            }
+            e.fulfill()
+        }
+        self.waitForExpectationsWithTimeout(10, handler: nil)
+    }
 }
