@@ -179,7 +179,7 @@ public class Sync15StorageClient<T : CleartextPayloadJSON> {
         let deferred = Deferred<Result<StorageResponse<[Record<T>]>>>(defaultQueue: self.resultQueue)
 
         let req = requestGET(self.serverURI)
-        req.responseJSON { (_, response, data, error) in
+        req.responseParsedJSON { (_, response, data, error) in
             if let error = error {
                 deferred.fill(Result(failure: error))
                 return
