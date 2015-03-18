@@ -116,6 +116,7 @@ public class NSUserDefaultsProfilePrefs : ProfilePrefs {
         }
         return nil
     }
+
     public func stringArrayForKey(defaultName: String) -> [String]? {
         return userDefaults.stringArrayForKey(qualifyKey(defaultName)) as [String]?
     }
