@@ -6,7 +6,7 @@ import Foundation
 
 // TODO: return values?
 public protocol Synchronizer {
-    init(info: InfoCollections)
+    init(info: InfoCollections, prefs: ProfilePrefs)
     func synchronize()
 }
 
