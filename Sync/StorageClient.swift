@@ -210,3 +210,25 @@ public class Sync15StorageClient<T : CleartextPayloadJSON> {
         return deferred
     }
 }
+
+extension Request {
+    public func responseParsedJSON(completionHandler: (NSURLRequest, NSHTTPURLResponse?, AnyObject?, NSError?) -> Void) -> Self {
+        return response(serializer: Request.ParsedJSONResponseSerializer(), completionHandler: { (request, response, JSON, error) in
+            completionHandler(request, response, JSON, error)
+        })
+    }
+
+    public class func ParsedJSONResponseSerializer() -> Serializer {
+        return { (request, response, data) in
+            if data == nil || data?.length == 0 {
+                return (nil, nil)
+            }
+
+            let json = JSON(data: data!)
+            if json.isError {
+                return (nil, json.asError)
+            }
+            return (json, nil)
+        }
+    }
+}
