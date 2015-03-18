@@ -46,8 +46,7 @@ class TokenServerClientTests: LiveAccountTest {
                 certificate: certificate, audience: audience)
 
             let client = TokenServerClient()
-            let clientState = TokenServerClient.computeClientState(nil)
-            client.token(assertion, clientState: clientState).upon { result in
+            client.token(assertion, clientState: nil).upon { result in
                 if let token = result.successValue {
                     XCTAssertNotNil(token.id)
                     XCTAssertNotNil(token.key)
