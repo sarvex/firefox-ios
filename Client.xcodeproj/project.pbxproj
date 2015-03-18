@@ -31,6 +31,7 @@
 		0BF648111A9C54E900BA963C /* TopSitesPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BF648101A9C54E900BA963C /* TopSitesPanel.swift */; };
 		0BF6483C1A9D003D00BA963C /* TopSitesPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BF648101A9C54E900BA963C /* TopSitesPanel.swift */; };
 		0BF9F8BC1A3A82CA0049A0FA /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F84B21EF1A0910F600AAB793 /* Images.xcassets */; };
+		280ACA291AB8EB6F00DCF908 /* Synchronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 280ACA281AB8EB6F00DCF908 /* Synchronizer.swift */; };
 		280ACA481AB8F72300DCF908 /* Info.swift in Sources */ = {isa = PBXBuildFile; fileRef = 280ACA471AB8F72300DCF908 /* Info.swift */; };
 		282DA4691A68C13400A406E2 /* Clients.swift in Sources */ = {isa = PBXBuildFile; fileRef = E42CCDE21A23A6F900B794D3 /* Clients.swift */; };
 		282DA4731A68C1E700A406E2 /* OpenSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FA77831A43B2CE0010CD32 /* OpenSearch.swift */; };
@@ -828,6 +829,7 @@
 		0BF42D381A7C0E8900889E28 /* Favicons.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Favicons.js; sourceTree = "<group>"; };
 		0BF42D4E1A7CD09600889E28 /* TestFavicons.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestFavicons.swift; sourceTree = "<group>"; };
 		0BF648101A9C54E900BA963C /* TopSitesPanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TopSitesPanel.swift; sourceTree = "<group>"; };
+		280ACA281AB8EB6F00DCF908 /* Synchronizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Synchronizer.swift; sourceTree = "<group>"; };
 		280ACA471AB8F72300DCF908 /* Info.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Info.swift; sourceTree = "<group>"; };
 		28786E541AB0F5FA009EA9EF /* DeferredTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DeferredTests.swift; path = SyncTests/DeferredTests.swift; sourceTree = "<group>"; };
 		288A2D861AB8B3260023ABC3 /* Shared.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Shared.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1264,6 +1266,7 @@
 				28CE83BE1A1D1D3200576538 /* Records.swift */,
 				28CE83BF1A1D1D3200576538 /* SyncMeta.swift */,
 				28FEEE451AAFF5A1007FA476 /* StorageClient.swift */,
+				280ACA281AB8EB6F00DCF908 /* Synchronizer.swift */,
 				280ACA471AB8F72300DCF908 /* Info.swift */,
 			);
 			path = Sync;
@@ -2736,6 +2739,7 @@
 				D38B2D2E1A8D96D00040E6B5 /* GCDWebServer.m in Sources */,
 				28CE83C81A1D1D3200576538 /* SyncMeta.swift in Sources */,
 				E42475E81AB73B9B00B23D33 /* SWUtilityButtonView.m in Sources */,
+				280ACA291AB8EB6F00DCF908 /* Synchronizer.swift in Sources */,
 				D301AAEE1A3A55B70078DD1D /* TabTrayController.swift in Sources */,
 				D38B2D431A8D96D00040E6B5 /* GCDWebServerMultiPartFormRequest.m in Sources */,
 				E4CD9E911A6897FB00318571 /* ReaderMode.swift in Sources */,
