@@ -6,6 +6,17 @@ import Foundation
 import Alamofire
 import Shared
 
+public class BadRequestError : ErrorType {
+    public var description: String {
+        return "Bad request."
+    }
+}
+
+public class ServerError : ErrorType {
+    public var description: String {
+        return "Server error."
+    }
+}
 
 public class RecordParseError : ErrorType {
     public var description: String {
@@ -141,19 +152,37 @@ public class Sync15StorageClient<T : CleartextPayloadJSON> {
         let deferred = Deferred<Result<StorageResponse<Record<T>>>>(defaultQueue: self.resultQueue)
 
         let req = requestGET(uriForRecord(guid))
-        req.responseJSON { (_, response, data, error) in
+        req.responseParsedJSON { (_, response, data, error) in
+            println("Response is \(response), data is \(data)")
+
+            // TODO: generalize these error blocks. They'll be mostly the same for each operation.
             if let error = error {
+                println("Got error.")
                 deferred.fill(Result(failure: error))
                 return
             }
 
             if response == nil {
                 // TODO: better error.
+                println("No response")
                 deferred.fill(Result(failure: RecordParseError()))
+                return
+            }
+
+            println("Status code: \(response!.statusCode)")
+            if response!.statusCode >= 500 {
+                deferred.fill(Result(failure: ServerError()))
+                return
+            }
+
+            if response!.statusCode >= 400 {
+                deferred.fill(Result(failure: BadRequestError()))
+                return
             }
 
             if let json: JSON = data as? JSON {
                 let envelope = EnvelopeJSON(json)
+                println("Envelope: \(envelope) is valid \(envelope.isValid())")
                 let record = Record<T>.fromEnvelope(envelope, payloadFactory: self.factory)
                 if let record = record {
                     let metadata = ResponseMetadata(headers: response!.allHeaderFields)
@@ -161,6 +190,8 @@ public class Sync15StorageClient<T : CleartextPayloadJSON> {
                     deferred.fill(Result(success: storageResponse))
                     return
                 }
+            } else {
+                println("Couldn't cast JSON.")
             }
 
             deferred.fill(Result(failure: RecordParseError()))
