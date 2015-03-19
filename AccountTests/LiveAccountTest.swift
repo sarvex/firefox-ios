@@ -87,8 +87,10 @@ class LiveAccountTest: XCTestCase {
         return login.bind { loginResult in
             switch loginResult {
             case let .Failure(error):
+                println("Login failure: \(error)")
                 return Deferred(value: .Failure(error))
             case let .Success(loginResponse):
+                println("Login success.")
                 let loginResponse = loginResponse.value
                 let unwrapkB = FxAClient10.computeUnwrapKey(stretchedPW)
                 let now = Int64(NSDate().timeIntervalSince1970 * 1000)
