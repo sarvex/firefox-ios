@@ -32,7 +32,11 @@ class LiveStorageClientTests : LiveAccountTest {
         }
 
         let keyBundle: KeyBundle = KeyBundle.fromKB(married.kB)
-        let keysFactory: (String) -> KeysPayload? = Keys(defaultBundle: keyBundle).factory("keys")
+        let f: (JSON) -> KeysPayload = {
+            j in
+            return KeysPayload(j)
+        }
+        let keysFactory: (String) -> KeysPayload? = Keys(defaultBundle: keyBundle).factory("keys", f)
 
         let workQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
         let resultQueue = dispatch_get_main_queue()
