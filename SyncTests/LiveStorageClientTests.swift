@@ -8,37 +8,15 @@ import Shared
 import XCTest
 
 class LiveStorageClientTests : LiveAccountTest {
-    // This is so complicated because all of the withFoo test functions take completion handlers
-    // rather than returning a Deferred.
-    func getToken() -> Deferred<Result<TokenServerToken>> {
-        let deferred = Deferred<Result<TokenServerToken>>()
-
-        let audience = TokenServerClient.getAudienceForURL(ProductionSync15Configuration().tokenServerEndpointURL)
-        withCertificate { expectation, emailUTF8, keyPair, certificate in
-            let assertion = JSONWebTokenUtils.createAssertionWithPrivateKeyToSignWith(keyPair.privateKey,
-                certificate: certificate, audience: audience)
-
-            let client = TokenServerClient()
-
-            client.token(assertion).upon({
-                result in
-                println("Assertion \(assertion), got \(result)")
-                deferred.fill(result)
-            })
-        }
-
-        return deferred
-    }
-
     func getToken(state: FirefoxAccountState) -> Deferred<Result<TokenServerToken>> {
         if let married = state as? FirefoxAccountState.Married {
             let audience = TokenServerClient.getAudienceForURL(ProductionSync15Configuration().tokenServerEndpointURL)
             let clientState = FxAClient10.computeClientState(married.kB)
             let client = TokenServerClient()
+            println("Fetching token.")
             return client.token(married.generateAssertionForAudience(audience), clientState: clientState)
-        } else {
-            return Deferred(value: Result(failure: NSError(domain: "foo", code: 0, userInfo: nil)))
         }
+        return Deferred(value: Result(failure: NSError(domain: "foo", code: 0, userInfo: nil)))
     }
 
     func getKeys(married: FirefoxAccountState.Married, token: TokenServerToken) -> Deferred<Result<Record<KeysPayload>>> {
@@ -58,10 +36,10 @@ class LiveStorageClientTests : LiveAccountTest {
 
         let workQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
         let resultQueue = dispatch_get_main_queue()
-        let keysFetch = Sync15StorageClient(serverURI: cryptoURI!, authorizer: authorizer, factory: keysFactory, workQueue: workQueue, resultQueue: resultQueue)
+        let keysFetcher = Sync15StorageClient(serverURI: cryptoURI!, authorizer: authorizer, factory: keysFactory, workQueue: workQueue, resultQueue: resultQueue)
 
-        let response = keysFetch.get("keys")
-        return response.map({
+        return keysFetcher.get("keys").map({
+            // Unwrap the response.
             res in
             if let r = res.successValue {
                 return Result(success: r.value)
@@ -70,44 +48,77 @@ class LiveStorageClientTests : LiveAccountTest {
         })
     }
 
-    func testLive() {
-        let expectation = expectationWithDescription("Waiting on value.")
-
-        // client: mgWl22CIzHiE
+    func getTokenAndDefaultKeys() -> Deferred<Result<(TokenServerToken, KeyBundle)>> {
         let user = "holygoat+permatest@gmail.com"
         let state = withState(user, password: user)
 
+        println("Got state.")
         let token = state.bind {
             (stateResult: Result<FirefoxAccountState>) -> Deferred<Result<TokenServerToken>> in
+
+            println("Got state bound.")
             if let s = stateResult.successValue {
+
+                println("Got state: \(s)")
                 return self.getToken(s)
+            } else {
+                println("State wasn't successful.")
             }
             return Deferred(value: Result(failure: stateResult.failureValue!))
         }
 
-        if let married = state.value.successValue as? FirefoxAccountState.Married {
-            let keys: Deferred<Result<Record<KeysPayload>>> = token.bind {
-                tokenResult in
+        let keysPayload: Deferred<Result<Record<KeysPayload>>> = token.bind {
+            tokenResult in
+            if let married = state.value.successValue as? FirefoxAccountState.Married {
                 if let token = tokenResult.successValue {
                     return self.getKeys(married, token: token)
                 }
-                return Deferred(value: Result(failure: NSError(domain: "foo", code: 0, userInfo: nil)))
             }
-            keys.upon({
-                res in
-                if let rec = res.successValue {
-                    XCTAssert(rec.id == "keys", "GUID is correct.")
-                    XCTAssert(rec.modified > 1000, "modified is sane.")
-                    println("Body: \(rec.payload)")
-                } else {
-                    XCTFail("No key record.")
-                }
-                expectation.fulfill()
-            })
-        } else {
-            XCTFail("Not in state Married.")
-            return
+            return Deferred(value: Result(failure: NSError(domain: "foo", code: 0, userInfo: nil)))
         }
+
+        let defaultKeys: Deferred<KeyBundle?> = keysPayload.map {
+            res in
+            if let rec = res.successValue {
+                XCTAssert(rec.id == "keys", "GUID is correct.")
+                XCTAssert(rec.modified > 1000, "modified is sane.")
+                let payload: KeysPayload = rec.payload
+                println("Body: \(payload.toString(pretty: false))")
+                return payload.defaultKeys
+            }
+            return nil
+        }
+
+        let result = Deferred<Result<(TokenServerToken, KeyBundle)>>()
+        defaultKeys.upon {
+            keys in
+            // We shouldn't have been able to get keys if the token is invalid.
+            if let keys = keys {
+                result.fill(Result(success: (token.value.successValue!, keys)))
+            } else {
+                result.fill(Result(failure: NSError(domain: "foo", code: 0, userInfo: nil)))
+            }
+        }
+        return result
+    }
+
+    func testLive() {
+        let expectation = expectationWithDescription("Waiting on value.")
+        let deferred = getTokenAndDefaultKeys()
+        deferred.upon {
+            res in
+            if let (token, keyBundle) = res.successValue {
+                println("Yay")
+            } else {
+                XCTFail("Couldn't get keys etc.")
+            }
+            expectation.fulfill()
+        }
+
+        // client: mgWl22CIzHiE
+
+
+
         /*
         token.upon( {
             tokenResult in
